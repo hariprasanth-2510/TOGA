@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+
 import '../features/learning/data/database/learning_tables.dart';
 
 part 'app_database.g.dart';

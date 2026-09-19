@@ -39,7 +39,7 @@ class LearningSeedService {
         {
           'title': 'Introduction to Radio Navigation',
           'blocks': [
-            'Radio navigation uses radio-based signals and airborne equipment to support aircraft navigation when visual references are insufficient.',
+            'Radio navigation uses radio-based signals and airborne equipment to support aircraft navigation when visualreferences are insufficient.',
             'The learning sequence introduces terminology and operating concepts used by common radio-navigation systems.',
           ],
         },
@@ -125,7 +125,6 @@ class LearningSeedService {
 
       for (var index = 0; index < units.length; index++) {
         final unit = units[index];
-
         final unitId = await database.into(database.learningUnits).insert(
               LearningUnitsCompanion.insert(
                 chapterId: chapterId,
@@ -135,7 +134,6 @@ class LearningSeedService {
             );
 
         final blocks = unit['blocks'] as List<String>;
-
         for (var i = 0; i < blocks.length; i++) {
           await database.into(database.contentBlocks).insert(
                 ContentBlocksCompanion.insert(
@@ -148,7 +146,6 @@ class LearningSeedService {
         }
 
         final check = unit['check'] as Map<String, dynamic>?;
-
         if (check != null) {
           await database.into(database.knowledgeChecks).insert(
                 KnowledgeChecksCompanion.insert(
