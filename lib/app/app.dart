@@ -5,10 +5,7 @@ import 'router.dart';
 import 'theme.dart';
 
 class TogaApp extends StatelessWidget {
-  TogaApp({
-    super.key,
-    GoRouter? router,
-  }) : router = router ?? appRouter;
+  TogaApp({super.key, GoRouter? router}) : router = router ?? appRouter;
 
   final GoRouter router;
 

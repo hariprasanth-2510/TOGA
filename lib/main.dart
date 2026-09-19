@@ -5,7 +5,7 @@ import 'app/app.dart';
 
 void main() {
   runApp(
-    const ProviderScope(
+    ProviderScope(
       child: TogaApp(),
     ),
   );

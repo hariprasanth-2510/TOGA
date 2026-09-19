@@ -1,45 +1,68 @@
-import 'package:isar/isar.dart';
-
-part 'learning_models.g.dart';
-
-@collection
 class Subject {
-  Id id = Isar.autoIncrement;
-  late String title;
-  String description = '';
+  const Subject({required this.id, required this.title, this.description});
+  final int id;
+  final String title;
+  final String? description;
 }
 
-@collection
 class Chapter {
-  Id id = Isar.autoIncrement;
-  late int subjectId;
-  late String title;
-  String description = '';
-  int order = 0;
+  const Chapter({
+    required this.id,
+    required this.subjectId,
+    required this.title,
+    this.description,
+    this.sortOrder = 0,
+  });
+  final int id;
+  final int subjectId;
+  final String title;
+  final String? description;
+  final int sortOrder;
 }
 
-@collection
 class LearningUnit {
-  Id id = Isar.autoIncrement;
-  late int chapterId;
-  late String title;
-  int order = 0;
-  List<ContentBlock> content = [];
+  const LearningUnit({
+    required this.id,
+    required this.chapterId,
+    required this.title,
+    this.summary,
+    this.sortOrder = 0,
+  });
+  final int id;
+  final int chapterId;
+  final String title;
+  final String? summary;
+  final int sortOrder;
 }
 
-@embedded
 class ContentBlock {
-  String type = 'text';
-  String text = '';
-  int order = 0;
+  const ContentBlock({
+    required this.id,
+    required this.learningUnitId,
+    required this.blockType,
+    required this.contentText,
+    this.sortOrder = 0,
+  });
+  final int id;
+  final int learningUnitId;
+  final String blockType;
+  final String contentText;
+  final int sortOrder;
 }
 
-@collection
 class KnowledgeCheck {
-  Id id = Isar.autoIncrement;
-  late int learningUnitId;
-  late String question;
-  List<String> options = [];
-  int correctOptionIndex = 0;
-  String explanation = '';
+  const KnowledgeCheck({
+    required this.id,
+    required this.learningUnitId,
+    required this.question,
+    required this.options,
+    required this.correctOptionIndex,
+    this.explanation,
+  });
+  final int id;
+  final int learningUnitId;
+  final String question;
+  final List<String> options;
+  final int correctOptionIndex;
+  final String? explanation;
 }

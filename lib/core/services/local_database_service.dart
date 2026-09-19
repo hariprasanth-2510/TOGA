@@ -1,19 +1,15 @@
-import '../../database/isar_database.dart';
+import '../../database/app_database.dart';
 
 class LocalDatabaseService {
   LocalDatabaseService({
-    IsarDatabase? database,
-  }) : _database = database ?? IsarDatabase.instance;
+    AppDatabase? database,
+  }) : _database = database ?? AppDatabase();
 
-  final IsarDatabase _database;
+  final AppDatabase _database;
 
-  Future<void> initialize({
-    String? directory,
-  }) {
-    return _database.initialize(directory: directory);
-  }
+  AppDatabase get database => _database;
 
-  bool get isInitialized => _database.isInitialized;
+  bool get isInitialized => true;
 
   Future<void> close() => _database.close();
 }
