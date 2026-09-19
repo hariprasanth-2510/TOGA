@@ -2,9 +2,26 @@
 
 Flutter application for the TOGA Learn module.
 
-## Commit 03 — Configure application architecture
+## Commit -1 — Configure app routing and theme
 
-This commit establishes the feature-oriented application structure.
+This commit introduces the application navigation shell and centralized
+Material 3 theme configuration.
+
+### Added
+- GoRouter-based application routing
+- Centralized light and dark themes
+- Dedicated home screen
+- `MaterialApp.router` application shell
+
+### Current route
+
+```text
+/
+└── HomeScreen
+```
+
+Feature-specific routes will be added as the learning and assessment
+modules are implemented.
 
 ### Architecture
 
@@ -19,27 +36,6 @@ Services / Data Sources
     ↓
 Local Persistence
 ```
-
-The project is organized by feature so that learning, assessment, progress,
-and synchronization can evolve independently.
-
-### Current structure
-
-```text
-lib/
-├── app/
-├── core/
-├── database/
-├── features/
-│   ├── learning/
-│   ├── assessment/
-│   ├── progress/
-│   └── sync/
-└── main.dart
-```
-
-Persistence and concrete feature implementations are intentionally added in
-later commits.
 
 ### Run
 

@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import 'router.dart';
+import 'theme.dart';
 
 class TogaApp extends StatelessWidget {
-  const TogaApp({
+  TogaApp({
     super.key,
-    required this.home,
-  });
+    GoRouter? router,
+  }) : router = router ?? appRouter;
 
-  final Widget home;
+  final GoRouter router;
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'TOGA',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
-        useMaterial3: true,
-      ),
-      home: home,
+      theme: TogaTheme.light(),
+      darkTheme: TogaTheme.dark(),
+      routerConfig: router,
     );
   }
 }
