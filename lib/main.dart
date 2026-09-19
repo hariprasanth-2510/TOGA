@@ -1,24 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'app/app.dart';
 
 void main() {
-  runApp(const TogaApp());
-}
-
-class TogaApp extends StatelessWidget {
-  const TogaApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'TOGA',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
-        useMaterial3: true,
+  runApp(
+    const ProviderScope(
+      child: TogaApp(
+        home: HomeScreen(),
       ),
-      home: const HomeScreen(),
-    );
-  }
+    ),
+  );
 }
 
 class HomeScreen extends StatelessWidget {
@@ -27,12 +19,10 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('TOGA'),
-      ),
+      appBar: AppBar(title: const Text('TOGA')),
       body: const Center(
         child: Text(
-          'TOGA\nInitial project',
+          'TOGA\nArchitecture configured.',
           textAlign: TextAlign.center,
         ),
       ),

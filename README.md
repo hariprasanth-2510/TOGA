@@ -2,17 +2,44 @@
 
 Flutter application for the TOGA Learn module.
 
-## Commit 02 — Configure project dependencies
+## Commit 03 — Configure application architecture
 
-This commit adds the core application dependencies that will be used for
-state management and navigation.
+This commit establishes the feature-oriented application structure.
 
-### Added
-- `flutter_riverpod` — application state management
-- `go_router` — declarative application routing
+### Architecture
 
-The dependencies are configured now; feature architecture and route
-implementation are introduced in subsequent commits.
+```text
+Presentation
+    ↓
+Riverpod Providers
+    ↓
+Repositories
+    ↓
+Services / Data Sources
+    ↓
+Local Persistence
+```
+
+The project is organized by feature so that learning, assessment, progress,
+and synchronization can evolve independently.
+
+### Current structure
+
+```text
+lib/
+├── app/
+├── core/
+├── database/
+├── features/
+│   ├── learning/
+│   ├── assessment/
+│   ├── progress/
+│   └── sync/
+└── main.dart
+```
+
+Persistence and concrete feature implementations are intentionally added in
+later commits.
 
 ### Run
 
