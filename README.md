@@ -55,3 +55,24 @@ flutter run
 ```bash
 flutter test
 ```
+
+## Commit 5 — Learning Content Data Models
+
+Adds the persisted learning hierarchy required for the Learn module:
+
+`Subject -> Chapter -> LearningUnit -> ContentBlock / KnowledgeCheck`
+
+Models are Isar annotated. Regenerate the Isar adapter code locally with:
+
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
+
+Then verify:
+
+```bash
+flutter pub get
+flutter test
+```
+
+Learning content seeding and the learning UI are intentionally left for later commits.
