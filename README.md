@@ -2,39 +2,45 @@
 
 Flutter application for the TOGA Learn module.
 
-## Commit -1 — Configure app routing and theme
+## Commit 4 — Configure Isar local persistence
 
-This commit introduces the application navigation shell and centralized
-Material 3 theme configuration.
+This commit introduces Isar as the local persistence layer selected for the
+TOGA Learn assessment.
 
 ### Added
-- GoRouter-based application routing
-- Centralized light and dark themes
-- Dedicated home screen
-- `MaterialApp.router` application shell
 
-### Current route
+- `isar`
+- `isar_flutter_libs`
+- `build_runner`
+- `isar_generator`
+- Central `IsarDatabase` lifecycle service
+- `LocalDatabaseService` abstraction for feature repositories
 
-```text
-/
-└── HomeScreen
-```
+### Persistence direction
 
-Feature-specific routes will be added as the learning and assessment
-modules are implemented.
+The application will keep learner state locally so that learning and
+assessment recovery do not depend on network availability.
 
-### Architecture
+Planned persisted data includes:
 
-```text
-Presentation
-    ↓
-Riverpod Providers
-    ↓
-Repositories
-    ↓
-Services / Data Sources
-    ↓
-Local Persistence
+- Learning session state
+- Learning progress
+- Notes
+- Bookmarks
+- Knowledge-check attempts
+- Assessment attempts
+- Assessment answers and flags
+- Sync queue items
+
+Collection models are intentionally introduced in the following commit so
+that database setup and data modelling remain separate, reviewable changes.
+
+### Generate Isar code
+
+Once collection models are added:
+
+```bash
+dart run build_runner build --delete-conflicting-outputs
 ```
 
 ### Run
