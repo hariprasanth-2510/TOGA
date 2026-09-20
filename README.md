@@ -53,7 +53,7 @@ The suite has nine automated tests covering scoring, unanswered/incorrect accoun
 - **Release APK:** Upload `build/app/outputs/flutter-apk/app-release.apk` as a GitHub Release asset (recommended) or attach it wherever AIRMAN requests. Do not commit the generated `build/` directory.
 - **Demo video:** Upload a 3–5 minute video to YouTube as **Unlisted** or Google Drive with viewer access, then add its share link below. Keeping the video outside the Git repository avoids a large, slow clone.
 
-Demo video link: _Add your unlisted/share link here before submission._
+Demo video ,REPORT, APK link: https://drive.google.com/drive/folders/1V_PDd6sBsRAyQXU3KAIbd_FvrC8lqf0N?usp=sharing
 
 ### Submission checklist
 
@@ -61,9 +61,9 @@ Demo video link: _Add your unlisted/share link here before submission._
 - [x] README and YC Paxel Builder Report
 - [x] Seven automated tests
 - [x] Release APK generated locally
-- [ ] Push final commit to GitHub
-- [ ] Upload APK as a GitHub Release asset / requested submission attachment
-- [ ] Upload the demo video and replace the link above
+- [x] Push final commit to GitHub
+- [x] Upload APK as a GitHub Release asset / requested submission attachment
+- [x] Upload the demo video and replace the link above
 
 ## AI usage and engineering ownership
 

@@ -138,7 +138,7 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
                       : 'Flag for review'),
                 ),
                 const Spacer(),
-                Text('$index ${answered ? 'answered' : 'unanswered'}'),
+                Text('${index + 1} ${answered ? 'answered' : 'unanswered'}'),
               ]),
               Wrap(
                 spacing: 8,
