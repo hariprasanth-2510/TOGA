@@ -243,7 +243,11 @@ class _UnitDetailScreenState extends ConsumerState<UnitDetailScreen>
         ref.invalidate(learningSessionProvider(widget.unitId));
         ref.invalidate(latestLearningSessionProvider);
       }
-      ref.read(syncStatusProvider.notifier).complete();
+      // Local persistence succeeded; asynchronously update the UI-facing
+      // sync status without delaying this debounced save operation.
+      unawaited(
+        ref.read(syncStatusProvider.notifier).syncLocalChange(),
+      );
     } catch (error, stackTrace) {
       // The local database is the source of truth. A failed write must never
       // tear down a timer callback or crash the learning session.

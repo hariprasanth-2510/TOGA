@@ -10,7 +10,7 @@ dart run build_runner build --delete-conflicting-outputs
 flutter run
 ```
 
-Release APK: `flutter build apk --release`.
+Build the release APK with `flutter build apk --release`. The generated file is `build/app/outputs/flutter-apk/app-release.apk`.
 
 Run checks with `flutter analyze` and `flutter test`.
 
@@ -46,7 +46,24 @@ Local SQLite is always written before a sync status changes, so offline study is
 
 ## Tests
 
-The suite protects scoring, unanswered/incorrect accounting, topic mastery and weak-topic selection, deadline-based timer recovery, randomized-option correctness, and app startup.
+The suite has seven automated tests covering scoring, unanswered/incorrect accounting, topic mastery and weak-topic selection, deadline-based timer recovery, randomized-option correctness, persisted learning-session progress/resume state, and app startup.
+
+## Submission assets
+
+- **Release APK:** Upload `build/app/outputs/flutter-apk/app-release.apk` as a GitHub Release asset (recommended) or attach it wherever AIRMAN requests. Do not commit the generated `build/` directory.
+- **Demo video:** Upload a 3–5 minute video to YouTube as **Unlisted** or Google Drive with viewer access, then add its share link below. Keeping the video outside the Git repository avoids a large, slow clone.
+
+Demo video link: _Add your unlisted/share link here before submission._
+
+### Submission checklist
+
+- [x] Working Flutter source code
+- [x] README and YC Paxel Builder Report
+- [x] Seven automated tests
+- [x] Release APK generated locally
+- [ ] Push final commit to GitHub
+- [ ] Upload APK as a GitHub Release asset / requested submission attachment
+- [ ] Upload the demo video and replace the link above
 
 ## AI usage and engineering ownership
 

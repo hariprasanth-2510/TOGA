@@ -34,7 +34,7 @@ class AssessmentResultsScreen extends ConsumerWidget {
             return ListView(
               padding: const EdgeInsets.all(24),
               children: [
-                Text(result.passed ? 'Passed' : 'Needs revision',
+                Text(result.passed ? 'Passed' : 'Failed',
                     style: Theme.of(context).textTheme.headlineMedium),
                 const SizedBox(height: 8),
                 Text(
