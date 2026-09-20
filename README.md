@@ -1,8 +1,12 @@
 # TOGA Learn
 
-An offline-first Flutter learning experience for Radio Navigation. It combines a resumable chapter session with a timed, recoverable practice assessment and targeted revision.
+Offline-first Flutter module for Air Navigation → Radio Navigation. You study a seven-unit chapter, take a timed practice test on it, and get sent back to the exact unit you're weakest on. Closing the app at any point doesn't lose anything.
 
-## Run
+**Demo video, report and APK:** https://drive.google.com/drive/folders/1V_PDd6sBsRAyQXU3KAIbd_FvrC8lqf0N?usp=sharing
+
+## Setup
+
+You need Flutter (stable) and an Android device or emulator.
 
 ```bash
 flutter pub get
@@ -10,72 +14,137 @@ dart run build_runner build --delete-conflicting-outputs
 flutter run
 ```
 
-Build the release APK with `flutter build apk --release`. The generated file is `build/app/outputs/flutter-apk/app-release.apk`.
+The `build_runner` step generates the Drift database code, so the app won't compile without it. Re-run it if you touch any table definition.
 
-Run checks with `flutter analyze` and `flutter test`.
+Checks:
 
-## What is included
+```bash
+flutter analyze
+flutter test
+```
 
-- Seven structured learning units, with three answerable inline knowledge checks.
-- Persisted current unit, scroll position, read progress, study time, completion, notes, bookmarks, and check answers.
-- Resume card that takes the learner straight back to their last active position.
-- A configurable 20-question / 20-minute assessment across VOR, DME, interception, and tracking.
-- Persisted question order, option order, answers, flags, current question, deadline, and attempt state. The timer derives from the saved deadline, so backgrounding or restarting cannot reset it.
-- Submission confirmation, scoring, pass/fail, topic accuracy, review explanations, and direct weak-topic remediation to the matching learning unit.
-- Local save feedback (`Syncing`, `Synced`, `Sync failed — saved on this device`) and guarded async persistence so save failures do not crash a session.
+Release APK:
+
+```bash
+flutter build apk --release
+# build/app/outputs/flutter-apk/app-release.apk
+```
+
+## What it does
+
+**Learning session**
+- Seven units of Radio Navigation content, loaded from seed data (nothing is hard-coded in widgets).
+- Three units have an inline knowledge check. You pick an answer, see if it's right, read the explanation, and the attempt is saved.
+- Every unit can be bookmarked and has an editable note.
+- The app stores the current unit, scroll position, read progress, completion, study time and last activity. The "Continue Learning" card takes you straight back to where you stopped, scroll position included.
+
+**Practice assessment**
+- 20 questions, 20 minutes, 70% pass mark, across VOR, DME, Interception and Tracking. All of that comes from an `AssessmentConfig` object rather than the UI.
+- Question order and option order are randomised once and saved, so a restored attempt looks identical.
+- Question navigator (answered / unanswered / current / flagged), flagging, and a confirmation dialog showing answered, unanswered and flagged counts before you submit.
+- Results show score, percentage, pass/fail, correct/incorrect/unanswered, time taken, per-topic accuracy and the weakest topic.
+- Review screen shows your answer, the correct one, the explanation, topic and difficulty.
+- "Review weak topic" opens the learning unit linked to that topic, not the top of the chapter.
+- The dashboard shows assessments completed, average score and topic mastery across all submitted attempts.
 
 ## Architecture
 
+Feature-first folders. Learning and assessment each have their own `data`, `domain` and `presentation` layers.
+
 ```text
-Presentation (screens/widgets)
-        ↓ Riverpod providers
-Feature services
-        ↓ repositories
-Drift / SQLite local database
+screens / widgets
+      ↓  (Riverpod providers)
+services
+      ↓
+repositories
+      ↓
+Drift + SQLite
 ```
 
-The project is feature-oriented. Seed content, typed models, repositories, services, providers, and presentation remain separate. Widgets do not define chapter or question data. Drift is used for durable relational learner state; its generated database types are mapped to feature models at repository boundaries.
+Rules like scoring, mastery, state transitions and the timer live in the services, not in widgets. Repositories are the only place Drift's generated row types get turned into the app's own models, so swapping the data source for an API later shouldn't touch anything above them. Routing is GoRouter, with parameterised routes for units, attempts, results and review.
 
-## State and persistence
+## State management
 
-Riverpod owns dependency construction and asynchronous screen state. SQLite stores seeded content, sessions, personal unit data, knowledge-check attempts, assessment attempts, and assessment answers. An assessment attempt is only editable in `inProgress`; it becomes immutable once submitted. The persisted deadline, rather than a decrementing counter, is the timer source of truth.
+Riverpod does two jobs here: building repositories/services once, and exposing async state to screens. I used it over passing things around manually mainly because overriding a provider with an in-memory database in tests is trivial.
+
+One deliberate exception: the countdown clock is a `ValueNotifier`, not a provider. Watching a provider that reads the database every second was causing pointless rebuilds. Only real user actions (answering, flagging, moving between questions) write to the database.
+
+## Persistence
+
+I went with Drift on SQLite. An attempt is relational (attempt → questions → answers and flags) and needs to be updated in one go, so I wanted real transactions instead of a pile of key-value entries. It also makes the analytics queries easy.
+
+Stored locally:
+
+- seed content (subject, chapter, units, checks, questions)
+- learning sessions
+- notes and bookmarks, in their own table keyed by unit, so updating seed content can never wipe them
+- knowledge check attempts
+- assessment attempts and their answers
+- the sync outbox
+
+An attempt can only be edited while it's `inProgress`. Once it's submitted the service layer refuses further changes, so a finished attempt can't quietly become editable again.
+
+**Timer:** the attempt stores an absolute `deadlineAt`. Time remaining is always `deadlineAt − now`, so leaving the app, killing it, or reopening it hours later gives the right answer. When time runs out the attempt auto-submits.
 
 ## Sync strategy
 
-Local SQLite is always written before a sync status changes, so offline study is safe. The `SyncService`/`SyncRepository` boundary is intentionally API-ready: a production implementation should enqueue an idempotency key with each local mutation, upload pending records, and mark a record `synced` only after acknowledgement. The current app has no remote endpoint, so status feedback models the local-first acknowledgement path; a failed local save is clearly surfaced while the prior persisted state remains intact.
+Every change is written to SQLite first. The sync status shown in the UI (`Syncing`, `Synced`, `Pending`, `Sync failed`) only changes after that write, so studying offline is always safe.
+
+Changes are queued in a local outbox, and pending changes for the same record are collapsed into one so retrying doesn't create duplicates. If a sync fails, the UI says the progress is saved on the device and offers Retry.
+
+There's no backend in this project, so the upload step is simulated behind `SyncService` / `SyncRepository`. To connect a real API you'd:
+
+1. attach an idempotency key to each queued mutation,
+2. upload pending records in batches,
+3. mark a record `synced` only after the server acknowledges it,
+4. leave failed ones pending and retry with backoff.
 
 ## Tests
 
-The suite has nine automated tests covering scoring, unanswered/incorrect accounting, topic mastery and weak-topic selection, deadline-based timer recovery, randomized-option correctness, persisted learning-session progress/resume state, sync-queue de-duplication, cross-attempt analytics, and app startup.
+Nine tests. They cover:
 
-## Submission assets
+- scoring, plus correct / incorrect / unanswered counts
+- topic mastery and weakest-topic selection
+- timer recovery from a persisted deadline
+- correct answer tracking with shuffled options
+- learning progress saved and restored (in-memory SQLite)
+- sync queue de-duplication
+- analytics across multiple attempts
+- app startup
 
-- **Release APK:** Upload `build/app/outputs/flutter-apk/app-release.apk` as a GitHub Release asset (recommended) or attach it wherever AIRMAN requests. Do not commit the generated `build/` directory.
-- **Demo video:** Upload a 3–5 minute video to YouTube as **Unlisted** or Google Drive with viewer access, then add its share link below. Keeping the video outside the Git repository avoids a large, slow clone.
+I tried to test the things that would hurt most if they broke: the score, the topic you're sent to revise, the time left, and where you resume.
 
-Demo video ,REPORT, APK link: https://drive.google.com/drive/folders/1V_PDd6sBsRAyQXU3KAIbd_FvrC8lqf0N?usp=sharing
+## AI usage
 
-### Submission checklist
+I used Codex for reading through the requirements, speeding up implementation, and running analysis and tests. I reviewed what it produced against app lifecycle behaviour, Drift migrations and how the timer behaves after a restart.
 
-- [x] Working Flutter source code
-- [x] README and YC Paxel Builder Report
-- [x] Seven automated tests
-- [x] Release APK generated locally
-- [x] Push final commit to GitHub
-- [x] Upload APK as a GitHub Release asset / requested submission attachment
-- [x] Upload the demo video and replace the link above
+Things it got wrong, or that I changed:
 
-## AI usage and engineering ownership
+- **Timer:** the first approach was a decrementing counter, which drifts and resets after a restart. Replaced it with the persisted `deadlineAt`.
+- **Async saves:** saves weren't guarded, so a failure inside a timer callback could surface as an unhandled error. Wrapped them.
+- **Sync call:** a stale `SyncController.complete()` call broke `flutter analyze` (`undefined_method`). I replaced it with a non-blocking `syncLocalChange()` via `unawaited` so a debounced save isn't held up.
+- **Navigation:** review nested under the active-attempt route could redirect away after submitting. Results and review now sit on sibling routes with explicit back destinations and a `PopScope`.
+- **Notes and bookmarks:** they were initially mixed into seed data. Moved to their own table.
+- **Radio buttons:** switched to `RadioGroup` after the deprecation warnings.
 
-Codex was used to inspect requirements, accelerate implementation, and run static analysis/tests. Generated suggestions were reviewed against app lifecycle rules, Drift migrations, and persisted timer semantics. In particular, a naive decrementing timer and unguarded async saves were rejected because they would fail after a restart or let timer callbacks surface errors.
+## Trade-offs (48 hours)
 
-## 48-hour trade-offs / future work
-
-1. Sync is API-ready and status-aware, but a real authenticated backend and durable outbound queue need a server contract.
-2. Knowledge checks retain the latest answer; full answer history and richer learner analytics are future work.
-3. Learning diagrams are represented by structured text placeholders; production content should ship accessible images or vector diagrams.
-4. Add integration tests covering device restart and background lifecycle events on a physical device.
+1. **Simulated sync.** The queue, statuses and retry are real, but there's no authenticated backend, since I had no server contract to code against.
+2. **Knowledge checks keep the latest answer only.** Full answer history and richer analytics would come next.
+3. **Diagrams are text placeholders.** I put time into persistence and recovery first. Real content should ship accessible images with captions.
+4. **No device-level lifecycle tests.** In-memory database tests were quicker to write and cover the rules, but they don't exercise a real background/restart cycle.
 
 ## Known issues
 
-No known release-blocking application issues remain after static analysis and automated test validation. Before public-store distribution, configure a unique Android application ID and production signing key. The API-ready sync boundary also needs a real backend and durable outbound queue before it can synchronise across devices.
+- Restart and background recovery has not been covered by automated device tests.
+- The Android application ID and signing key are still defaults. Set both before publishing anywhere public.
+- Theme choice isn't saved between launches.
+- Sync isn't connected to a real server yet, so nothing syncs across devices.
+
+## Future improvements
+
+- Integration tests for restart and background events on a physical device
+- Accessible aviation diagrams
+- Real backend sync using the idempotency approach above
+- Knowledge check history
+- Persist the theme setting
