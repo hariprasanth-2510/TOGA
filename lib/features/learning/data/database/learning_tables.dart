@@ -48,7 +48,28 @@ class LearningSessions extends Table {
   BoolColumn get completed => boolean().withDefault(const Constant(false))();
   RealColumn get progress => real().withDefault(const Constant(0))();
   DateTimeColumn get sessionStartedAt => dateTime().nullable()();
-  IntColumn get totalStudySeconds =>
-      integer().withDefault(const Constant(0))();
+  IntColumn get totalStudySeconds => integer().withDefault(const Constant(0))();
   DateTimeColumn get lastActivityAt => dateTime().nullable()();
+}
+
+/// Learner-authored data is deliberately separate from the seeded content so
+/// a future content refresh can never overwrite a note or bookmark.
+class UnitPersonalData extends Table {
+  IntColumn get learningUnitId => integer()();
+  BoolColumn get bookmarked => boolean().withDefault(const Constant(false))();
+  TextColumn get note => text().nullable()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {learningUnitId};
+}
+
+class KnowledgeCheckAttempts extends Table {
+  IntColumn get knowledgeCheckId => integer()();
+  IntColumn get selectedOptionIndex => integer()();
+  BoolColumn get isCorrect => boolean()();
+  DateTimeColumn get answeredAt => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {knowledgeCheckId};
 }

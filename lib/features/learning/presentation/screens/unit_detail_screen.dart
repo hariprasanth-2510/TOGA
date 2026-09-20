@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../data/models/learning_models.dart';
 import '../providers/learning_provider.dart';
+import '../../../sync/presentation/sync_status_provider.dart';
 
 class UnitDetailScreen extends ConsumerStatefulWidget {
   const UnitDetailScreen({
@@ -105,9 +106,7 @@ class _UnitDetailScreenState extends ConsumerState<UnitDetailScreen>
   }
 
   void _restoreScrollPositionAfterLayout() {
-    if (!_sessionReady ||
-        _scrollPositionRestored ||
-        _scrollRestoreScheduled) {
+    if (!_sessionReady || _scrollPositionRestored || _scrollRestoreScheduled) {
       return;
     }
 
@@ -168,9 +167,7 @@ class _UnitDetailScreenState extends ConsumerState<UnitDetailScreen>
 
     // If the unit fits on one screen, completion is explicit. For
     // scrollable units, reading position maps directly to progress.
-    final next = max <= 0
-        ? _progress
-        : (offset / max).clamp(0.0, 1.0);
+    final next = max <= 0 ? _progress : (offset / max).clamp(0.0, 1.0);
 
     setState(() {
       _progress = _completed ? 1.0 : next;
@@ -198,6 +195,7 @@ class _UnitDetailScreenState extends ConsumerState<UnitDetailScreen>
 
     _saving = true;
     try {
+      ref.read(syncStatusProvider.notifier).begin();
       final position = _scrollController.hasClients
           ? _scrollController.offset
           : session.scrollPosition;
@@ -206,9 +204,8 @@ class _UnitDetailScreenState extends ConsumerState<UnitDetailScreen>
           ? _scrollController.position.maxScrollExtent
           : 0.0;
 
-      final calculated = max <= 0
-          ? _progress
-          : (position / max).clamp(0.0, 1.0);
+      final calculated =
+          max <= 0 ? _progress : (position / max).clamp(0.0, 1.0);
 
       final progress = _completed ? 1.0 : calculated;
       final completed = _completed || progress >= 0.98;
@@ -246,6 +243,13 @@ class _UnitDetailScreenState extends ConsumerState<UnitDetailScreen>
         ref.invalidate(learningSessionProvider(widget.unitId));
         ref.invalidate(latestLearningSessionProvider);
       }
+      ref.read(syncStatusProvider.notifier).complete();
+    } catch (error, stackTrace) {
+      // The local database is the source of truth. A failed write must never
+      // tear down a timer callback or crash the learning session.
+      debugPrint('Unable to save learning session: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      ref.read(syncStatusProvider.notifier).fail();
     } finally {
       _saving = false;
     }
@@ -273,6 +277,7 @@ class _UnitDetailScreenState extends ConsumerState<UnitDetailScreen>
     final checks = ref.watch(knowledgeChecksProvider(widget.unitId));
     final session = ref.watch(learningSessionProvider(widget.unitId));
     final units = ref.watch(learningUnitsProvider(widget.chapterId));
+    final syncStatus = ref.watch(syncStatusProvider);
 
     session.whenData((value) {
       if (!_sessionReady) {
@@ -286,6 +291,7 @@ class _UnitDetailScreenState extends ConsumerState<UnitDetailScreen>
       appBar: AppBar(
         title: const Text('Learning Unit'),
         actions: [
+          _PersonalActions(unitId: widget.unitId),
           if (_completed)
             const Padding(
               padding: EdgeInsets.only(right: 16),
@@ -308,90 +314,122 @@ class _UnitDetailScreenState extends ConsumerState<UnitDetailScreen>
           return CustomScrollView(
             controller: _scrollController,
             slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            '${(_progress * 100).round()}% complete',
-                            style: Theme.of(context).textTheme.labelLarge,
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${(_progress * 100).round()}% complete',
+                              style: Theme.of(context).textTheme.labelLarge,
+                            ),
                           ),
-                        ),
-                        Text(
-                          _completed ? 'Completed' : 'In progress',
-                          style: Theme.of(context).textTheme.labelMedium,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    LinearProgressIndicator(value: _progress),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Study time: ${_formatDuration(_displayStudySeconds)}',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
+                          Text(
+                            _completed ? 'Completed' : 'In progress',
+                            style: Theme.of(context).textTheme.labelMedium,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      LinearProgressIndicator(value: _progress),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Study time: ${_formatDuration(_displayStudySeconds)}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 4),
+                      _SyncStatusLabel(status: syncStatus),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  ...items.map(
-                    (block) => Padding(
-                      padding: const EdgeInsets.only(bottom: 18),
-                      child: Text(
-                        block.contentText,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              height: 1.6,
-                            ),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    ...items.map(
+                      (block) => Padding(
+                        padding: const EdgeInsets.only(bottom: 18),
+                        child: Text(
+                          block.contentText,
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    height: 1.6,
+                                  ),
+                        ),
                       ),
                     ),
-                  ),
-                  checks.when(
-                    loading: () => const Padding(
-                      padding: EdgeInsets.only(top: 8),
-                      child: LinearProgressIndicator(),
+                    checks.when(
+                      loading: () => const Padding(
+                        padding: EdgeInsets.only(top: 8),
+                        child: LinearProgressIndicator(),
+                      ),
+                      error: (_, __) => const SizedBox.shrink(),
+                      data: (checkItems) => Column(
+                        children: checkItems
+                            .map(
+                              (check) => _KnowledgeCheckPreview(check: check),
+                            )
+                            .toList(),
+                      ),
                     ),
-                    error: (_, __) => const SizedBox.shrink(),
-                    data: (checkItems) => Column(
-                      children: checkItems
-                          .map(
-                            (check) => _KnowledgeCheckPreview(check: check),
-                          )
-                          .toList(),
-                    ),
-                  ),
-                ]),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: units.when(
-                loading: () => const Padding(
-                  padding: EdgeInsets.fromLTRB(20, 0, 20, 32),
-                  child: LinearProgressIndicator(),
-                ),
-                error: (_, __) => const SizedBox.shrink(),
-                data: (unitItems) => _UnitNavigation(
-                  units: unitItems,
-                  currentUnitId: widget.unitId,
-                  onUnitSelected: _openUnit,
-                  onComplete: _markComplete,
-                  completed: _completed,
+                  ]),
                 ),
               ),
-            ),
+              SliverToBoxAdapter(
+                child: units.when(
+                  loading: () => const Padding(
+                    padding: EdgeInsets.fromLTRB(20, 0, 20, 32),
+                    child: LinearProgressIndicator(),
+                  ),
+                  error: (_, __) => const SizedBox.shrink(),
+                  data: (unitItems) => _UnitNavigation(
+                    units: unitItems,
+                    currentUnitId: widget.unitId,
+                    onUnitSelected: _openUnit,
+                    onComplete: _markComplete,
+                    completed: _completed,
+                  ),
+                ),
+              ),
             ],
           );
         },
       ),
     );
+  }
+}
+
+class _SyncStatusLabel extends StatelessWidget {
+  const _SyncStatusLabel({required this.status});
+  final SyncStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    final (icon, label, color) = switch (status) {
+      SyncStatus.synced => (Icons.cloud_done_outlined, 'Synced', Colors.green),
+      SyncStatus.pending => (
+          Icons.cloud_queue_outlined,
+          'Pending sync',
+          Colors.orange
+        ),
+      SyncStatus.syncing => (Icons.sync_rounded, 'Syncing…', Colors.blue),
+      SyncStatus.failed => (
+          Icons.cloud_off_outlined,
+          'Sync failed — saved on this device',
+          Theme.of(context).colorScheme.error
+        ),
+    };
+    return Row(children: [
+      Icon(icon, size: 16, color: color),
+      const SizedBox(width: 5),
+      Text(label,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: color)),
+    ]);
   }
 }
 
@@ -459,13 +497,79 @@ class _UnitNavigation extends StatelessWidget {
   }
 }
 
-class _KnowledgeCheckPreview extends StatelessWidget {
+class _PersonalActions extends ConsumerWidget {
+  const _PersonalActions({required this.unitId});
+  final int unitId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final personal = ref.watch(unitPersonalizationProvider(unitId));
+    return personal.when(
+      loading: () => const SizedBox(width: 48),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (value) => Row(mainAxisSize: MainAxisSize.min, children: [
+        IconButton(
+          tooltip: value.bookmarked ? 'Remove bookmark' : 'Bookmark unit',
+          icon: Icon(value.bookmarked ? Icons.bookmark : Icons.bookmark_border),
+          onPressed: () async {
+            await ref
+                .read(learningSessionRepositoryProvider)
+                .savePersonalization(
+                    learningUnitId: unitId,
+                    bookmarked: !value.bookmarked,
+                    note: value.note);
+            ref.invalidate(unitPersonalizationProvider(unitId));
+          },
+        ),
+        IconButton(
+          tooltip: 'Edit note',
+          icon: const Icon(Icons.note_alt_outlined),
+          onPressed: () => _editNote(context, ref, value),
+        ),
+      ]),
+    );
+  }
+
+  Future<void> _editNote(
+      BuildContext context, WidgetRef ref, UnitPersonalization personal) async {
+    final controller = TextEditingController(text: personal.note ?? '');
+    final note = await showDialog<String?>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Personal note'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLines: 5,
+          maxLength: 1000,
+          decoration: const InputDecoration(hintText: 'Add a revision note…'),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel')),
+          FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, controller.text),
+              child: const Text('Save')),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (note == null) return;
+    await ref.read(learningSessionRepositoryProvider).savePersonalization(
+        learningUnitId: unitId, bookmarked: personal.bookmarked, note: note);
+    ref.invalidate(unitPersonalizationProvider(unitId));
+  }
+}
+
+class _KnowledgeCheckPreview extends ConsumerWidget {
   const _KnowledgeCheckPreview({required this.check});
 
   final KnowledgeCheck check;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final savedAttempt = ref.watch(knowledgeCheckAttemptProvider(check.id));
     return Card(
       margin: const EdgeInsets.only(top: 12),
       child: Padding(
@@ -489,13 +593,51 @@ class _KnowledgeCheckPreview extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
-            Text(
-              '${check.options.length} answer options',
-              style: Theme.of(context).textTheme.bodySmall,
+            savedAttempt.when(
+              loading: () => const LinearProgressIndicator(),
+              error: (_, __) => const Text('Unable to restore this answer.'),
+              data: (attempt) => RadioGroup<int>(
+                groupValue: attempt?.selectedOptionIndex,
+                onChanged: (value) {
+                  if (attempt != null || value == null) return;
+                  unawaited(_saveAnswer(ref, value));
+                },
+                child: Column(
+                  children: check.options.indexed
+                      .map((option) => RadioListTile<int>(
+                            contentPadding: EdgeInsets.zero,
+                            value: option.$1,
+                            enabled: attempt == null,
+                            title: Text(option.$2),
+                          ))
+                      .toList(),
+                ),
+              ),
             ),
+            if (savedAttempt.valueOrNull case final attempt?) ...[
+              const SizedBox(height: 8),
+              Text(
+                attempt.isCorrect ? 'Correct' : 'Not quite',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: attempt.isCorrect
+                      ? Colors.green
+                      : Theme.of(context).colorScheme.error,
+                ),
+              ),
+              if (check.explanation != null) Text(check.explanation!),
+            ],
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _saveAnswer(WidgetRef ref, int value) async {
+    await ref.read(learningSessionRepositoryProvider).saveKnowledgeCheckAttempt(
+          check: check,
+          selectedOptionIndex: value,
+        );
+    ref.invalidate(knowledgeCheckAttemptProvider(check.id));
   }
 }

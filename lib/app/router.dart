@@ -5,6 +5,10 @@ import '../features/learning/presentation/screens/learn_screen.dart';
 import '../features/learning/presentation/screens/unit_detail_screen.dart';
 import '../features/learning/presentation/screens/unit_list_screen.dart';
 import 'home_screen.dart';
+import '../features/assessment/presentation/screens/assessment_config_screen.dart';
+import '../features/assessment/presentation/screens/assessment_results_screen.dart';
+import '../features/assessment/presentation/screens/assessment_screen.dart';
+import '../features/assessment/presentation/screens/question_review_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -41,6 +45,34 @@ final GoRouter appRouter = GoRouter(
               ],
             ),
           ],
+        ),
+      ],
+    ),
+    GoRoute(
+      path: '/assessment',
+      builder: (context, state) => const AssessmentConfigScreen(),
+      routes: [
+        GoRoute(
+          path: ':attemptId',
+          builder: (context, state) => AssessmentScreen(
+            attemptId: state.pathParameters['attemptId']!,
+          ),
+        ),
+        // These are deliberately siblings of the editable attempt route.
+        // Nesting them under `:attemptId` also built AssessmentScreen below
+        // them; its submitted-attempt redirect then immediately replaced the
+        // review page with results.
+        GoRoute(
+          path: ':attemptId/results',
+          builder: (context, state) => AssessmentResultsScreen(
+            attemptId: state.pathParameters['attemptId']!,
+          ),
+        ),
+        GoRoute(
+          path: ':attemptId/review',
+          builder: (context, state) => QuestionReviewScreen(
+            attemptId: state.pathParameters['attemptId']!,
+          ),
         ),
       ],
     ),

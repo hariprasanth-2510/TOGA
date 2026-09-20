@@ -87,6 +87,61 @@ class LearningSessionRepository {
     );
   }
 
+  Future<UnitPersonalization> getPersonalization(int learningUnitId) async {
+    final row = await (_database.select(_database.unitPersonalData)
+          ..where((table) => table.learningUnitId.equals(learningUnitId)))
+        .getSingleOrNull();
+    return row == null
+        ? const UnitPersonalization()
+        : UnitPersonalization(
+            bookmarked: row.bookmarked,
+            note: row.note,
+            updatedAt: row.updatedAt);
+  }
+
+  Future<void> savePersonalization({
+    required int learningUnitId,
+    required bool bookmarked,
+    String? note,
+  }) async {
+    final companion = db.UnitPersonalDataCompanion(
+      learningUnitId: Value(learningUnitId),
+      bookmarked: Value(bookmarked),
+      note: Value(note?.trim().isEmpty ?? true ? null : note!.trim()),
+      updatedAt: Value(DateTime.now()),
+    );
+    await _database
+        .into(_database.unitPersonalData)
+        .insertOnConflictUpdate(companion);
+  }
+
+  Future<KnowledgeCheckAttempt?> getKnowledgeCheckAttempt(int checkId) async {
+    final row = await (_database.select(_database.knowledgeCheckAttempts)
+          ..where((table) => table.knowledgeCheckId.equals(checkId)))
+        .getSingleOrNull();
+    return row == null
+        ? null
+        : KnowledgeCheckAttempt(
+            knowledgeCheckId: row.knowledgeCheckId,
+            selectedOptionIndex: row.selectedOptionIndex,
+            isCorrect: row.isCorrect,
+            answeredAt: row.answeredAt,
+          );
+  }
+
+  Future<void> saveKnowledgeCheckAttempt({
+    required KnowledgeCheck check,
+    required int selectedOptionIndex,
+  }) =>
+      _database.into(_database.knowledgeCheckAttempts).insertOnConflictUpdate(
+            db.KnowledgeCheckAttemptsCompanion(
+              knowledgeCheckId: Value(check.id),
+              selectedOptionIndex: Value(selectedOptionIndex),
+              isCorrect: Value(selectedOptionIndex == check.correctOptionIndex),
+              answeredAt: Value(DateTime.now()),
+            ),
+          );
+
   Future<LearningSession?> _getById(int id) async {
     final row = await (_database.select(_database.learningSessions)
           ..where((table) => table.id.equals(id)))

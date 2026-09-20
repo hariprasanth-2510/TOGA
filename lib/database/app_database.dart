@@ -5,6 +5,7 @@ import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../features/learning/data/database/learning_tables.dart';
+import '../features/assessment/data/database/assessment_tables.dart';
 
 part 'app_database.g.dart';
 
@@ -16,6 +17,10 @@ part 'app_database.g.dart';
     ContentBlocks,
     KnowledgeChecks,
     LearningSessions,
+    UnitPersonalData,
+    KnowledgeCheckAttempts,
+    AssessmentAttempts,
+    AssessmentAnswers,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -29,7 +34,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -37,6 +42,19 @@ class AppDatabase extends _$AppDatabase {
         onUpgrade: (Migrator m, int from, int to) async {
           if (from < 2) {
             await m.createTable(learningSessions);
+          }
+          if (from < 3) {
+            await m.createTable(assessmentAttempts);
+            await m.createTable(assessmentAnswers);
+          } else if (from < 4) {
+            // A v2 database receives the current table definition above,
+            // including this column. Only v3 needs an ALTER TABLE.
+            await m.addColumn(
+                assessmentAttempts, assessmentAttempts.optionOrderJson);
+          }
+          if (from < 5) {
+            await m.createTable(unitPersonalData);
+            await m.createTable(knowledgeCheckAttempts);
           }
         },
       );

@@ -92,3 +92,24 @@ class LearningSession {
   final int totalStudySeconds;
   final DateTime? lastActivityAt;
 }
+
+class UnitPersonalization {
+  const UnitPersonalization(
+      {this.bookmarked = false, this.note, this.updatedAt});
+  final bool bookmarked;
+  final String? note;
+  final DateTime? updatedAt;
+}
+
+class KnowledgeCheckAttempt {
+  const KnowledgeCheckAttempt({
+    required this.knowledgeCheckId,
+    required this.selectedOptionIndex,
+    required this.isCorrect,
+    required this.answeredAt,
+  });
+  final int knowledgeCheckId;
+  final int selectedOptionIndex;
+  final bool isCorrect;
+  final DateTime answeredAt;
+}
