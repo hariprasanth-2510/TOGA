@@ -12,11 +12,31 @@ class LearningRepository {
 
   Future<List<Subject>> getSubjects() async {
     final rows = await _database.select(_database.subjects).get();
-    return rows.map((row) => Subject(
+    return rows
+        .map((row) => Subject(
+              id: row.id,
+              title: row.title,
+              description: row.description,
+            ))
+        .toList();
+  }
+
+  Future<LearningUnit?> getLearningUnit(int learningUnitId) async {
+    final row = await (_database.select(_database.learningUnits)
+          ..where((table) => table.id.equals(learningUnitId)))
+        .getSingleOrNull();
+
+    if (row == null) {
+      return null;
+    }
+
+    return LearningUnit(
       id: row.id,
+      chapterId: row.chapterId,
       title: row.title,
-      description: row.description,
-    )).toList();
+      summary: row.summary,
+      sortOrder: row.sortOrder,
+    );
   }
 
   Future<List<Chapter>> getChapters(int subjectId) async {
@@ -24,13 +44,15 @@ class LearningRepository {
       ..where((row) => row.subjectId.equals(subjectId))
       ..orderBy([(row) => OrderingTerm.asc(row.sortOrder)]);
     final rows = await query.get();
-    return rows.map((row) => Chapter(
-      id: row.id,
-      subjectId: row.subjectId,
-      title: row.title,
-      description: row.description,
-      sortOrder: row.sortOrder,
-    )).toList();
+    return rows
+        .map((row) => Chapter(
+              id: row.id,
+              subjectId: row.subjectId,
+              title: row.title,
+              description: row.description,
+              sortOrder: row.sortOrder,
+            ))
+        .toList();
   }
 
   Future<List<LearningUnit>> getLearningUnits(int chapterId) async {
@@ -38,13 +60,15 @@ class LearningRepository {
       ..where((row) => row.chapterId.equals(chapterId))
       ..orderBy([(row) => OrderingTerm.asc(row.sortOrder)]);
     final rows = await query.get();
-    return rows.map((row) => LearningUnit(
-      id: row.id,
-      chapterId: row.chapterId,
-      title: row.title,
-      summary: row.summary,
-      sortOrder: row.sortOrder,
-    )).toList();
+    return rows
+        .map((row) => LearningUnit(
+              id: row.id,
+              chapterId: row.chapterId,
+              title: row.title,
+              summary: row.summary,
+              sortOrder: row.sortOrder,
+            ))
+        .toList();
   }
 
   Future<List<ContentBlock>> getContentBlocks(int learningUnitId) async {
@@ -52,28 +76,53 @@ class LearningRepository {
       ..where((row) => row.learningUnitId.equals(learningUnitId))
       ..orderBy([(row) => OrderingTerm.asc(row.sortOrder)]);
     final rows = await query.get();
-    return rows.map((row) => ContentBlock(
-      id: row.id,
-      learningUnitId: row.learningUnitId,
-      blockType: row.blockType,
-      contentText: row.contentText,
-      sortOrder: row.sortOrder,
-    )).toList();
+    return rows
+        .map((row) => ContentBlock(
+              id: row.id,
+              learningUnitId: row.learningUnitId,
+              blockType: row.blockType,
+              contentText: row.contentText,
+              sortOrder: row.sortOrder,
+            ))
+        .toList();
   }
 
   Future<List<KnowledgeCheck>> getKnowledgeChecks(int learningUnitId) async {
     final query = _database.select(_database.knowledgeChecks)
       ..where((row) => row.learningUnitId.equals(learningUnitId));
     final rows = await query.get();
-    return rows.map((row) => KnowledgeCheck(
-      id: row.id,
-      learningUnitId: row.learningUnitId,
-      question: row.question,
-      options: (jsonDecode(row.optionsJson) as List<dynamic>)
-          .map((item) => item.toString())
-          .toList(),
-      correctOptionIndex: row.correctOptionIndex,
-      explanation: row.explanation,
-    )).toList();
+    return rows
+        .map((row) => KnowledgeCheck(
+              id: row.id,
+              learningUnitId: row.learningUnitId,
+              question: row.question,
+              options: (jsonDecode(row.optionsJson) as List<dynamic>)
+                  .map((item) => item.toString())
+                  .toList(),
+              correctOptionIndex: row.correctOptionIndex,
+              explanation: row.explanation,
+            ))
+        .toList();
+  }
+
+  Future<List<LearningUnit>> getAllLearningUnits() async {
+    final rows = await (_database.select(_database.learningUnits)
+          ..orderBy([
+            (table) => OrderingTerm.asc(table.chapterId),
+            (table) => OrderingTerm.asc(table.sortOrder),
+          ]))
+        .get();
+
+    return rows
+        .map(
+          (row) => LearningUnit(
+            id: row.id,
+            chapterId: row.chapterId,
+            title: row.title,
+            summary: row.summary,
+            sortOrder: row.sortOrder,
+          ),
+        )
+        .toList();
   }
 }

@@ -15,21 +15,29 @@ part 'app_database.g.dart';
     LearningUnits,
     ContentBlocks,
     KnowledgeChecks,
+    LearningSessions,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
-      : super(
-          executor ?? LazyDatabase(_openConnection),
-        );
+      : super(executor ?? LazyDatabase(_openConnection));
 
   static Future<QueryExecutor> _openConnection() async {
     final directory = await getApplicationDocumentsDirectory();
     final file = File('${directory.path}/toga.sqlite');
-
     return NativeDatabase.createInBackground(file);
   }
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (Migrator m) async => m.createAll(),
+        onUpgrade: (Migrator m, int from, int to) async {
+          if (from < 2) {
+            await m.createTable(learningSessions);
+          }
+        },
+      );
 }

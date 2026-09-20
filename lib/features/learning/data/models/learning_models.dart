@@ -66,3 +66,29 @@ class KnowledgeCheck {
   final int correctOptionIndex;
   final String? explanation;
 }
+
+class LearningSession {
+  const LearningSession({
+    required this.id,
+    required this.subjectId,
+    required this.chapterId,
+    required this.learningUnitId,
+    required this.scrollPosition,
+    required this.completed,
+    required this.progress,
+    this.sessionStartedAt,
+    required this.totalStudySeconds,
+    this.lastActivityAt,
+  });
+
+  final int id;
+  final int subjectId;
+  final int chapterId;
+  final int learningUnitId;
+  final double scrollPosition;
+  final bool completed;
+  final double progress;
+  final DateTime? sessionStartedAt;
+  final int totalStudySeconds;
+  final DateTime? lastActivityAt;
+}

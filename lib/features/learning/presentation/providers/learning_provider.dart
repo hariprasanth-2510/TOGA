@@ -1,16 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../database/app_database.dart' as db;
-import '../../data/models/learning_models.dart';
+import '../../../../database/app_database.dart';
+import '../../data/models/learning_models.dart' as models;
 import '../../data/repositories/learning_repository.dart';
+import '../../data/repositories/learning_session_repository.dart';
 import '../../data/seed/learning_seed_service.dart';
 import '../../domain/services/local_learning_service.dart';
 
-final appDatabaseProvider = Provider<db.AppDatabase>((ref) {
-  final database = db.AppDatabase();
-
+final appDatabaseProvider = Provider<AppDatabase>((ref) {
+  final database = AppDatabase();
   ref.onDispose(database.close);
-
   return database;
 });
 
@@ -33,56 +32,95 @@ final learningInitializedProvider = FutureProvider<void>((ref) {
   return ref.watch(localLearningServiceProvider).initialize();
 });
 
-final subjectsProvider = FutureProvider<List<Subject>>((ref) async {
+final subjectsProvider = FutureProvider<List<models.Subject>>((ref) async {
   await ref.watch(learningInitializedProvider.future);
-
-  final subjects = await ref.watch(learningRepositoryProvider).getSubjects();
-
-  return subjects.whereType<Subject>().toList();
+  return ref.watch(learningRepositoryProvider).getSubjects();
 });
 
 final chaptersProvider =
-    FutureProvider.family<List<Chapter>, int>((ref, subjectId) async {
+    FutureProvider.family<List<models.Chapter>, int>((ref, subjectId) async {
   await ref.watch(learningInitializedProvider.future);
-
-  final chapters =
-      await ref.watch(learningRepositoryProvider).getChapters(subjectId);
-
-  return chapters.whereType<Chapter>().toList();
+  return ref.watch(learningRepositoryProvider).getChapters(subjectId);
 });
 
 final learningUnitsProvider =
-    FutureProvider.family<List<LearningUnit>, int>((ref, chapterId) async {
+    FutureProvider.family<List<models.LearningUnit>, int>((ref, chapterId) async {
   await ref.watch(learningInitializedProvider.future);
-
-  final units =
-      await ref.watch(learningRepositoryProvider).getLearningUnits(chapterId);
-
-  return units.whereType<LearningUnit>().toList();
+  return ref.watch(learningRepositoryProvider).getLearningUnits(chapterId);
 });
 
-final contentBlocksProvider = FutureProvider.family<List<ContentBlock>, int>(
-  (ref, learningUnitId) async {
-    await ref.watch(learningInitializedProvider.future);
+final contentBlocksProvider =
+    FutureProvider.family<List<models.ContentBlock>, int>((ref, learningUnitId) async {
+  await ref.watch(learningInitializedProvider.future);
+  return ref.watch(learningRepositoryProvider).getContentBlocks(learningUnitId);
+});
 
-    final blocks = await ref.watch(learningRepositoryProvider).getContentBlocks(
-          learningUnitId,
-        );
+final knowledgeChecksProvider =
+    FutureProvider.family<List<models.KnowledgeCheck>, int>((ref, learningUnitId) async {
+  await ref.watch(learningInitializedProvider.future);
+  return ref.watch(learningRepositoryProvider)
+      .getKnowledgeChecks(learningUnitId);
+});
 
-    return blocks.whereType<ContentBlock>().toList();
+final learningSessionRepositoryProvider =
+    Provider<LearningSessionRepository>((ref) {
+  return LearningSessionRepository(ref.watch(appDatabaseProvider));
+});
+
+final learningSessionProvider =
+    FutureProvider.family<models.LearningSession?, int>((ref, learningUnitId) async {
+  await ref.watch(learningInitializedProvider.future);
+  return ref.watch(learningSessionRepositoryProvider).getSession(learningUnitId);
+});
+
+
+final learningUnitsForChapterProvider =
+    FutureProvider.family<List<models.LearningUnit>, int>(
+  (ref, chapterId) async {
+    return ref.watch(learningUnitsProvider(chapterId).future);
   },
 );
 
-final knowledgeChecksProvider =
-    FutureProvider.family<List<KnowledgeCheck>, int>(
-  (ref, learningUnitId) async {
+
+final latestLearningSessionProvider = FutureProvider<models.LearningSession?>(
+  (ref) async {
     await ref.watch(learningInitializedProvider.future);
 
-    final checks =
-        await ref.watch(learningRepositoryProvider).getKnowledgeChecks(
-              learningUnitId,
-            );
+    final units = await ref.watch(learningRepositoryProvider).getAllLearningUnits();
+    if (units.isEmpty) return null;
 
-    return checks.whereType<KnowledgeCheck>().toList();
+    final sessions = await ref
+        .watch(learningSessionRepositoryProvider)
+        .getSessionsForUnitIds(units.map((unit) => unit.id).toList());
+
+    final active = sessions
+        // A learner may leave a short unit before scrolling far enough to
+        // register progress. Any saved position or study time is still a
+        // meaningful resumable session.
+        .where(
+          (session) =>
+              !session.completed &&
+              (session.progress > 0 ||
+                  session.totalStudySeconds > 0 ||
+                  session.scrollPosition > 0),
+        )
+        .toList()
+      ..sort(
+        (a, b) => (b.lastActivityAt ?? DateTime.fromMillisecondsSinceEpoch(0))
+            .compareTo(
+          a.lastActivityAt ?? DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+      );
+
+    return active.isEmpty ? null : active.first;
+  },
+);
+
+
+final learningUnitByIdProvider =
+    FutureProvider.family<models.LearningUnit?, int>(
+  (ref, unitId) async {
+    await ref.watch(learningInitializedProvider.future);
+    return ref.watch(learningRepositoryProvider).getLearningUnit(unitId);
   },
 );

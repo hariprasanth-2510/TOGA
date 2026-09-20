@@ -33,6 +33,8 @@ final GoRouter appRouter = GoRouter(
                 GoRoute(
                   path: 'unit/:unitId',
                   builder: (context, state) => UnitDetailScreen(
+                    subjectId: int.parse(state.pathParameters['subjectId']!),
+                    chapterId: int.parse(state.pathParameters['chapterId']!),
                     unitId: int.parse(state.pathParameters['unitId']!),
                   ),
                 ),

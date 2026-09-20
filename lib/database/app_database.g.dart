@@ -1487,6 +1487,534 @@ class KnowledgeChecksCompanion extends UpdateCompanion<KnowledgeCheck> {
   }
 }
 
+class $LearningSessionsTable extends LearningSessions
+    with TableInfo<$LearningSessionsTable, LearningSession> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LearningSessionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _subjectIdMeta =
+      const VerificationMeta('subjectId');
+  @override
+  late final GeneratedColumn<int> subjectId = GeneratedColumn<int>(
+      'subject_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _chapterIdMeta =
+      const VerificationMeta('chapterId');
+  @override
+  late final GeneratedColumn<int> chapterId = GeneratedColumn<int>(
+      'chapter_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _learningUnitIdMeta =
+      const VerificationMeta('learningUnitId');
+  @override
+  late final GeneratedColumn<int> learningUnitId = GeneratedColumn<int>(
+      'learning_unit_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _scrollPositionMeta =
+      const VerificationMeta('scrollPosition');
+  @override
+  late final GeneratedColumn<double> scrollPosition = GeneratedColumn<double>(
+      'scroll_position', aliasedName, false,
+      type: DriftSqlType.double,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _completedMeta =
+      const VerificationMeta('completed');
+  @override
+  late final GeneratedColumn<bool> completed = GeneratedColumn<bool>(
+      'completed', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("completed" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _progressMeta =
+      const VerificationMeta('progress');
+  @override
+  late final GeneratedColumn<double> progress = GeneratedColumn<double>(
+      'progress', aliasedName, false,
+      type: DriftSqlType.double,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _sessionStartedAtMeta =
+      const VerificationMeta('sessionStartedAt');
+  @override
+  late final GeneratedColumn<DateTime> sessionStartedAt =
+      GeneratedColumn<DateTime>('session_started_at', aliasedName, true,
+          type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _totalStudySecondsMeta =
+      const VerificationMeta('totalStudySeconds');
+  @override
+  late final GeneratedColumn<int> totalStudySeconds = GeneratedColumn<int>(
+      'total_study_seconds', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _lastActivityAtMeta =
+      const VerificationMeta('lastActivityAt');
+  @override
+  late final GeneratedColumn<DateTime> lastActivityAt =
+      GeneratedColumn<DateTime>('last_activity_at', aliasedName, true,
+          type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        subjectId,
+        chapterId,
+        learningUnitId,
+        scrollPosition,
+        completed,
+        progress,
+        sessionStartedAt,
+        totalStudySeconds,
+        lastActivityAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'learning_sessions';
+  @override
+  VerificationContext validateIntegrity(Insertable<LearningSession> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('subject_id')) {
+      context.handle(_subjectIdMeta,
+          subjectId.isAcceptableOrUnknown(data['subject_id']!, _subjectIdMeta));
+    } else if (isInserting) {
+      context.missing(_subjectIdMeta);
+    }
+    if (data.containsKey('chapter_id')) {
+      context.handle(_chapterIdMeta,
+          chapterId.isAcceptableOrUnknown(data['chapter_id']!, _chapterIdMeta));
+    } else if (isInserting) {
+      context.missing(_chapterIdMeta);
+    }
+    if (data.containsKey('learning_unit_id')) {
+      context.handle(
+          _learningUnitIdMeta,
+          learningUnitId.isAcceptableOrUnknown(
+              data['learning_unit_id']!, _learningUnitIdMeta));
+    } else if (isInserting) {
+      context.missing(_learningUnitIdMeta);
+    }
+    if (data.containsKey('scroll_position')) {
+      context.handle(
+          _scrollPositionMeta,
+          scrollPosition.isAcceptableOrUnknown(
+              data['scroll_position']!, _scrollPositionMeta));
+    }
+    if (data.containsKey('completed')) {
+      context.handle(_completedMeta,
+          completed.isAcceptableOrUnknown(data['completed']!, _completedMeta));
+    }
+    if (data.containsKey('progress')) {
+      context.handle(_progressMeta,
+          progress.isAcceptableOrUnknown(data['progress']!, _progressMeta));
+    }
+    if (data.containsKey('session_started_at')) {
+      context.handle(
+          _sessionStartedAtMeta,
+          sessionStartedAt.isAcceptableOrUnknown(
+              data['session_started_at']!, _sessionStartedAtMeta));
+    }
+    if (data.containsKey('total_study_seconds')) {
+      context.handle(
+          _totalStudySecondsMeta,
+          totalStudySeconds.isAcceptableOrUnknown(
+              data['total_study_seconds']!, _totalStudySecondsMeta));
+    }
+    if (data.containsKey('last_activity_at')) {
+      context.handle(
+          _lastActivityAtMeta,
+          lastActivityAt.isAcceptableOrUnknown(
+              data['last_activity_at']!, _lastActivityAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LearningSession map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LearningSession(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      subjectId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}subject_id'])!,
+      chapterId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}chapter_id'])!,
+      learningUnitId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}learning_unit_id'])!,
+      scrollPosition: attachedDatabase.typeMapping.read(
+          DriftSqlType.double, data['${effectivePrefix}scroll_position'])!,
+      completed: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}completed'])!,
+      progress: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}progress'])!,
+      sessionStartedAt: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}session_started_at']),
+      totalStudySeconds: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}total_study_seconds'])!,
+      lastActivityAt: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}last_activity_at']),
+    );
+  }
+
+  @override
+  $LearningSessionsTable createAlias(String alias) {
+    return $LearningSessionsTable(attachedDatabase, alias);
+  }
+}
+
+class LearningSession extends DataClass implements Insertable<LearningSession> {
+  final int id;
+  final int subjectId;
+  final int chapterId;
+  final int learningUnitId;
+  final double scrollPosition;
+  final bool completed;
+  final double progress;
+  final DateTime? sessionStartedAt;
+  final int totalStudySeconds;
+  final DateTime? lastActivityAt;
+  const LearningSession(
+      {required this.id,
+      required this.subjectId,
+      required this.chapterId,
+      required this.learningUnitId,
+      required this.scrollPosition,
+      required this.completed,
+      required this.progress,
+      this.sessionStartedAt,
+      required this.totalStudySeconds,
+      this.lastActivityAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['subject_id'] = Variable<int>(subjectId);
+    map['chapter_id'] = Variable<int>(chapterId);
+    map['learning_unit_id'] = Variable<int>(learningUnitId);
+    map['scroll_position'] = Variable<double>(scrollPosition);
+    map['completed'] = Variable<bool>(completed);
+    map['progress'] = Variable<double>(progress);
+    if (!nullToAbsent || sessionStartedAt != null) {
+      map['session_started_at'] = Variable<DateTime>(sessionStartedAt);
+    }
+    map['total_study_seconds'] = Variable<int>(totalStudySeconds);
+    if (!nullToAbsent || lastActivityAt != null) {
+      map['last_activity_at'] = Variable<DateTime>(lastActivityAt);
+    }
+    return map;
+  }
+
+  LearningSessionsCompanion toCompanion(bool nullToAbsent) {
+    return LearningSessionsCompanion(
+      id: Value(id),
+      subjectId: Value(subjectId),
+      chapterId: Value(chapterId),
+      learningUnitId: Value(learningUnitId),
+      scrollPosition: Value(scrollPosition),
+      completed: Value(completed),
+      progress: Value(progress),
+      sessionStartedAt: sessionStartedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sessionStartedAt),
+      totalStudySeconds: Value(totalStudySeconds),
+      lastActivityAt: lastActivityAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastActivityAt),
+    );
+  }
+
+  factory LearningSession.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LearningSession(
+      id: serializer.fromJson<int>(json['id']),
+      subjectId: serializer.fromJson<int>(json['subjectId']),
+      chapterId: serializer.fromJson<int>(json['chapterId']),
+      learningUnitId: serializer.fromJson<int>(json['learningUnitId']),
+      scrollPosition: serializer.fromJson<double>(json['scrollPosition']),
+      completed: serializer.fromJson<bool>(json['completed']),
+      progress: serializer.fromJson<double>(json['progress']),
+      sessionStartedAt:
+          serializer.fromJson<DateTime?>(json['sessionStartedAt']),
+      totalStudySeconds: serializer.fromJson<int>(json['totalStudySeconds']),
+      lastActivityAt: serializer.fromJson<DateTime?>(json['lastActivityAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'subjectId': serializer.toJson<int>(subjectId),
+      'chapterId': serializer.toJson<int>(chapterId),
+      'learningUnitId': serializer.toJson<int>(learningUnitId),
+      'scrollPosition': serializer.toJson<double>(scrollPosition),
+      'completed': serializer.toJson<bool>(completed),
+      'progress': serializer.toJson<double>(progress),
+      'sessionStartedAt': serializer.toJson<DateTime?>(sessionStartedAt),
+      'totalStudySeconds': serializer.toJson<int>(totalStudySeconds),
+      'lastActivityAt': serializer.toJson<DateTime?>(lastActivityAt),
+    };
+  }
+
+  LearningSession copyWith(
+          {int? id,
+          int? subjectId,
+          int? chapterId,
+          int? learningUnitId,
+          double? scrollPosition,
+          bool? completed,
+          double? progress,
+          Value<DateTime?> sessionStartedAt = const Value.absent(),
+          int? totalStudySeconds,
+          Value<DateTime?> lastActivityAt = const Value.absent()}) =>
+      LearningSession(
+        id: id ?? this.id,
+        subjectId: subjectId ?? this.subjectId,
+        chapterId: chapterId ?? this.chapterId,
+        learningUnitId: learningUnitId ?? this.learningUnitId,
+        scrollPosition: scrollPosition ?? this.scrollPosition,
+        completed: completed ?? this.completed,
+        progress: progress ?? this.progress,
+        sessionStartedAt: sessionStartedAt.present
+            ? sessionStartedAt.value
+            : this.sessionStartedAt,
+        totalStudySeconds: totalStudySeconds ?? this.totalStudySeconds,
+        lastActivityAt:
+            lastActivityAt.present ? lastActivityAt.value : this.lastActivityAt,
+      );
+  LearningSession copyWithCompanion(LearningSessionsCompanion data) {
+    return LearningSession(
+      id: data.id.present ? data.id.value : this.id,
+      subjectId: data.subjectId.present ? data.subjectId.value : this.subjectId,
+      chapterId: data.chapterId.present ? data.chapterId.value : this.chapterId,
+      learningUnitId: data.learningUnitId.present
+          ? data.learningUnitId.value
+          : this.learningUnitId,
+      scrollPosition: data.scrollPosition.present
+          ? data.scrollPosition.value
+          : this.scrollPosition,
+      completed: data.completed.present ? data.completed.value : this.completed,
+      progress: data.progress.present ? data.progress.value : this.progress,
+      sessionStartedAt: data.sessionStartedAt.present
+          ? data.sessionStartedAt.value
+          : this.sessionStartedAt,
+      totalStudySeconds: data.totalStudySeconds.present
+          ? data.totalStudySeconds.value
+          : this.totalStudySeconds,
+      lastActivityAt: data.lastActivityAt.present
+          ? data.lastActivityAt.value
+          : this.lastActivityAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LearningSession(')
+          ..write('id: $id, ')
+          ..write('subjectId: $subjectId, ')
+          ..write('chapterId: $chapterId, ')
+          ..write('learningUnitId: $learningUnitId, ')
+          ..write('scrollPosition: $scrollPosition, ')
+          ..write('completed: $completed, ')
+          ..write('progress: $progress, ')
+          ..write('sessionStartedAt: $sessionStartedAt, ')
+          ..write('totalStudySeconds: $totalStudySeconds, ')
+          ..write('lastActivityAt: $lastActivityAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      subjectId,
+      chapterId,
+      learningUnitId,
+      scrollPosition,
+      completed,
+      progress,
+      sessionStartedAt,
+      totalStudySeconds,
+      lastActivityAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LearningSession &&
+          other.id == this.id &&
+          other.subjectId == this.subjectId &&
+          other.chapterId == this.chapterId &&
+          other.learningUnitId == this.learningUnitId &&
+          other.scrollPosition == this.scrollPosition &&
+          other.completed == this.completed &&
+          other.progress == this.progress &&
+          other.sessionStartedAt == this.sessionStartedAt &&
+          other.totalStudySeconds == this.totalStudySeconds &&
+          other.lastActivityAt == this.lastActivityAt);
+}
+
+class LearningSessionsCompanion extends UpdateCompanion<LearningSession> {
+  final Value<int> id;
+  final Value<int> subjectId;
+  final Value<int> chapterId;
+  final Value<int> learningUnitId;
+  final Value<double> scrollPosition;
+  final Value<bool> completed;
+  final Value<double> progress;
+  final Value<DateTime?> sessionStartedAt;
+  final Value<int> totalStudySeconds;
+  final Value<DateTime?> lastActivityAt;
+  const LearningSessionsCompanion({
+    this.id = const Value.absent(),
+    this.subjectId = const Value.absent(),
+    this.chapterId = const Value.absent(),
+    this.learningUnitId = const Value.absent(),
+    this.scrollPosition = const Value.absent(),
+    this.completed = const Value.absent(),
+    this.progress = const Value.absent(),
+    this.sessionStartedAt = const Value.absent(),
+    this.totalStudySeconds = const Value.absent(),
+    this.lastActivityAt = const Value.absent(),
+  });
+  LearningSessionsCompanion.insert({
+    this.id = const Value.absent(),
+    required int subjectId,
+    required int chapterId,
+    required int learningUnitId,
+    this.scrollPosition = const Value.absent(),
+    this.completed = const Value.absent(),
+    this.progress = const Value.absent(),
+    this.sessionStartedAt = const Value.absent(),
+    this.totalStudySeconds = const Value.absent(),
+    this.lastActivityAt = const Value.absent(),
+  })  : subjectId = Value(subjectId),
+        chapterId = Value(chapterId),
+        learningUnitId = Value(learningUnitId);
+  static Insertable<LearningSession> custom({
+    Expression<int>? id,
+    Expression<int>? subjectId,
+    Expression<int>? chapterId,
+    Expression<int>? learningUnitId,
+    Expression<double>? scrollPosition,
+    Expression<bool>? completed,
+    Expression<double>? progress,
+    Expression<DateTime>? sessionStartedAt,
+    Expression<int>? totalStudySeconds,
+    Expression<DateTime>? lastActivityAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (subjectId != null) 'subject_id': subjectId,
+      if (chapterId != null) 'chapter_id': chapterId,
+      if (learningUnitId != null) 'learning_unit_id': learningUnitId,
+      if (scrollPosition != null) 'scroll_position': scrollPosition,
+      if (completed != null) 'completed': completed,
+      if (progress != null) 'progress': progress,
+      if (sessionStartedAt != null) 'session_started_at': sessionStartedAt,
+      if (totalStudySeconds != null) 'total_study_seconds': totalStudySeconds,
+      if (lastActivityAt != null) 'last_activity_at': lastActivityAt,
+    });
+  }
+
+  LearningSessionsCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? subjectId,
+      Value<int>? chapterId,
+      Value<int>? learningUnitId,
+      Value<double>? scrollPosition,
+      Value<bool>? completed,
+      Value<double>? progress,
+      Value<DateTime?>? sessionStartedAt,
+      Value<int>? totalStudySeconds,
+      Value<DateTime?>? lastActivityAt}) {
+    return LearningSessionsCompanion(
+      id: id ?? this.id,
+      subjectId: subjectId ?? this.subjectId,
+      chapterId: chapterId ?? this.chapterId,
+      learningUnitId: learningUnitId ?? this.learningUnitId,
+      scrollPosition: scrollPosition ?? this.scrollPosition,
+      completed: completed ?? this.completed,
+      progress: progress ?? this.progress,
+      sessionStartedAt: sessionStartedAt ?? this.sessionStartedAt,
+      totalStudySeconds: totalStudySeconds ?? this.totalStudySeconds,
+      lastActivityAt: lastActivityAt ?? this.lastActivityAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (subjectId.present) {
+      map['subject_id'] = Variable<int>(subjectId.value);
+    }
+    if (chapterId.present) {
+      map['chapter_id'] = Variable<int>(chapterId.value);
+    }
+    if (learningUnitId.present) {
+      map['learning_unit_id'] = Variable<int>(learningUnitId.value);
+    }
+    if (scrollPosition.present) {
+      map['scroll_position'] = Variable<double>(scrollPosition.value);
+    }
+    if (completed.present) {
+      map['completed'] = Variable<bool>(completed.value);
+    }
+    if (progress.present) {
+      map['progress'] = Variable<double>(progress.value);
+    }
+    if (sessionStartedAt.present) {
+      map['session_started_at'] = Variable<DateTime>(sessionStartedAt.value);
+    }
+    if (totalStudySeconds.present) {
+      map['total_study_seconds'] = Variable<int>(totalStudySeconds.value);
+    }
+    if (lastActivityAt.present) {
+      map['last_activity_at'] = Variable<DateTime>(lastActivityAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LearningSessionsCompanion(')
+          ..write('id: $id, ')
+          ..write('subjectId: $subjectId, ')
+          ..write('chapterId: $chapterId, ')
+          ..write('learningUnitId: $learningUnitId, ')
+          ..write('scrollPosition: $scrollPosition, ')
+          ..write('completed: $completed, ')
+          ..write('progress: $progress, ')
+          ..write('sessionStartedAt: $sessionStartedAt, ')
+          ..write('totalStudySeconds: $totalStudySeconds, ')
+          ..write('lastActivityAt: $lastActivityAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1496,12 +2024,20 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ContentBlocksTable contentBlocks = $ContentBlocksTable(this);
   late final $KnowledgeChecksTable knowledgeChecks =
       $KnowledgeChecksTable(this);
+  late final $LearningSessionsTable learningSessions =
+      $LearningSessionsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [subjects, chapters, learningUnits, contentBlocks, knowledgeChecks];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+        subjects,
+        chapters,
+        learningUnits,
+        contentBlocks,
+        knowledgeChecks,
+        learningSessions
+      ];
 }
 
 typedef $$SubjectsTableCreateCompanionBuilder = SubjectsCompanion Function({
@@ -2335,6 +2871,263 @@ typedef $$KnowledgeChecksTableProcessedTableManager = ProcessedTableManager<
     ),
     KnowledgeCheck,
     PrefetchHooks Function()>;
+typedef $$LearningSessionsTableCreateCompanionBuilder
+    = LearningSessionsCompanion Function({
+  Value<int> id,
+  required int subjectId,
+  required int chapterId,
+  required int learningUnitId,
+  Value<double> scrollPosition,
+  Value<bool> completed,
+  Value<double> progress,
+  Value<DateTime?> sessionStartedAt,
+  Value<int> totalStudySeconds,
+  Value<DateTime?> lastActivityAt,
+});
+typedef $$LearningSessionsTableUpdateCompanionBuilder
+    = LearningSessionsCompanion Function({
+  Value<int> id,
+  Value<int> subjectId,
+  Value<int> chapterId,
+  Value<int> learningUnitId,
+  Value<double> scrollPosition,
+  Value<bool> completed,
+  Value<double> progress,
+  Value<DateTime?> sessionStartedAt,
+  Value<int> totalStudySeconds,
+  Value<DateTime?> lastActivityAt,
+});
+
+class $$LearningSessionsTableFilterComposer
+    extends Composer<_$AppDatabase, $LearningSessionsTable> {
+  $$LearningSessionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get subjectId => $composableBuilder(
+      column: $table.subjectId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get chapterId => $composableBuilder(
+      column: $table.chapterId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get learningUnitId => $composableBuilder(
+      column: $table.learningUnitId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get scrollPosition => $composableBuilder(
+      column: $table.scrollPosition,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get completed => $composableBuilder(
+      column: $table.completed, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get progress => $composableBuilder(
+      column: $table.progress, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get sessionStartedAt => $composableBuilder(
+      column: $table.sessionStartedAt,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get totalStudySeconds => $composableBuilder(
+      column: $table.totalStudySeconds,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get lastActivityAt => $composableBuilder(
+      column: $table.lastActivityAt,
+      builder: (column) => ColumnFilters(column));
+}
+
+class $$LearningSessionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LearningSessionsTable> {
+  $$LearningSessionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get subjectId => $composableBuilder(
+      column: $table.subjectId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get chapterId => $composableBuilder(
+      column: $table.chapterId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get learningUnitId => $composableBuilder(
+      column: $table.learningUnitId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get scrollPosition => $composableBuilder(
+      column: $table.scrollPosition,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get completed => $composableBuilder(
+      column: $table.completed, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get progress => $composableBuilder(
+      column: $table.progress, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get sessionStartedAt => $composableBuilder(
+      column: $table.sessionStartedAt,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get totalStudySeconds => $composableBuilder(
+      column: $table.totalStudySeconds,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get lastActivityAt => $composableBuilder(
+      column: $table.lastActivityAt,
+      builder: (column) => ColumnOrderings(column));
+}
+
+class $$LearningSessionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LearningSessionsTable> {
+  $$LearningSessionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get subjectId =>
+      $composableBuilder(column: $table.subjectId, builder: (column) => column);
+
+  GeneratedColumn<int> get chapterId =>
+      $composableBuilder(column: $table.chapterId, builder: (column) => column);
+
+  GeneratedColumn<int> get learningUnitId => $composableBuilder(
+      column: $table.learningUnitId, builder: (column) => column);
+
+  GeneratedColumn<double> get scrollPosition => $composableBuilder(
+      column: $table.scrollPosition, builder: (column) => column);
+
+  GeneratedColumn<bool> get completed =>
+      $composableBuilder(column: $table.completed, builder: (column) => column);
+
+  GeneratedColumn<double> get progress =>
+      $composableBuilder(column: $table.progress, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get sessionStartedAt => $composableBuilder(
+      column: $table.sessionStartedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get totalStudySeconds => $composableBuilder(
+      column: $table.totalStudySeconds, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastActivityAt => $composableBuilder(
+      column: $table.lastActivityAt, builder: (column) => column);
+}
+
+class $$LearningSessionsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $LearningSessionsTable,
+    LearningSession,
+    $$LearningSessionsTableFilterComposer,
+    $$LearningSessionsTableOrderingComposer,
+    $$LearningSessionsTableAnnotationComposer,
+    $$LearningSessionsTableCreateCompanionBuilder,
+    $$LearningSessionsTableUpdateCompanionBuilder,
+    (
+      LearningSession,
+      BaseReferences<_$AppDatabase, $LearningSessionsTable, LearningSession>
+    ),
+    LearningSession,
+    PrefetchHooks Function()> {
+  $$LearningSessionsTableTableManager(
+      _$AppDatabase db, $LearningSessionsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LearningSessionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LearningSessionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LearningSessionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> subjectId = const Value.absent(),
+            Value<int> chapterId = const Value.absent(),
+            Value<int> learningUnitId = const Value.absent(),
+            Value<double> scrollPosition = const Value.absent(),
+            Value<bool> completed = const Value.absent(),
+            Value<double> progress = const Value.absent(),
+            Value<DateTime?> sessionStartedAt = const Value.absent(),
+            Value<int> totalStudySeconds = const Value.absent(),
+            Value<DateTime?> lastActivityAt = const Value.absent(),
+          }) =>
+              LearningSessionsCompanion(
+            id: id,
+            subjectId: subjectId,
+            chapterId: chapterId,
+            learningUnitId: learningUnitId,
+            scrollPosition: scrollPosition,
+            completed: completed,
+            progress: progress,
+            sessionStartedAt: sessionStartedAt,
+            totalStudySeconds: totalStudySeconds,
+            lastActivityAt: lastActivityAt,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required int subjectId,
+            required int chapterId,
+            required int learningUnitId,
+            Value<double> scrollPosition = const Value.absent(),
+            Value<bool> completed = const Value.absent(),
+            Value<double> progress = const Value.absent(),
+            Value<DateTime?> sessionStartedAt = const Value.absent(),
+            Value<int> totalStudySeconds = const Value.absent(),
+            Value<DateTime?> lastActivityAt = const Value.absent(),
+          }) =>
+              LearningSessionsCompanion.insert(
+            id: id,
+            subjectId: subjectId,
+            chapterId: chapterId,
+            learningUnitId: learningUnitId,
+            scrollPosition: scrollPosition,
+            completed: completed,
+            progress: progress,
+            sessionStartedAt: sessionStartedAt,
+            totalStudySeconds: totalStudySeconds,
+            lastActivityAt: lastActivityAt,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable<$LearningSessionsTable, LearningSession>(table),
+                    BaseReferences<_$AppDatabase, $LearningSessionsTable,
+                        LearningSession>(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$LearningSessionsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $LearningSessionsTable,
+    LearningSession,
+    $$LearningSessionsTableFilterComposer,
+    $$LearningSessionsTableOrderingComposer,
+    $$LearningSessionsTableAnnotationComposer,
+    $$LearningSessionsTableCreateCompanionBuilder,
+    $$LearningSessionsTableUpdateCompanionBuilder,
+    (
+      LearningSession,
+      BaseReferences<_$AppDatabase, $LearningSessionsTable, LearningSession>
+    ),
+    LearningSession,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2349,4 +3142,6 @@ class $AppDatabaseManager {
       $$ContentBlocksTableTableManager(_db, _db.contentBlocks);
   $$KnowledgeChecksTableTableManager get knowledgeChecks =>
       $$KnowledgeChecksTableTableManager(_db, _db.knowledgeChecks);
+  $$LearningSessionsTableTableManager get learningSessions =>
+      $$LearningSessionsTableTableManager(_db, _db.learningSessions);
 }
