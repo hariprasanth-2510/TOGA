@@ -25,6 +25,14 @@ class AssessmentRepository {
     return row == null ? null : _mapAttempt(row);
   }
 
+  Future<List<AssessmentAttempt>> getSubmittedAttempts() async {
+    final rows = await (_database.select(_database.assessmentAttempts)
+          ..where((table) => table.status.equals(AssessmentStatus.submitted.name))
+          ..orderBy([(table) => OrderingTerm.desc(table.submittedAt)]))
+        .get();
+    return Future.wait(rows.map(_mapAttempt));
+  }
+
   Future<void> createAttempt(AssessmentAttempt attempt) =>
       _database.into(_database.assessmentAttempts).insert(
             db.AssessmentAttemptsCompanion.insert(

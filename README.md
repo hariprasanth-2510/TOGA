@@ -46,7 +46,7 @@ Local SQLite is always written before a sync status changes, so offline study is
 
 ## Tests
 
-The suite has seven automated tests covering scoring, unanswered/incorrect accounting, topic mastery and weak-topic selection, deadline-based timer recovery, randomized-option correctness, persisted learning-session progress/resume state, and app startup.
+The suite has nine automated tests covering scoring, unanswered/incorrect accounting, topic mastery and weak-topic selection, deadline-based timer recovery, randomized-option correctness, persisted learning-session progress/resume state, sync-queue de-duplication, cross-attempt analytics, and app startup.
 
 ## Submission assets
 

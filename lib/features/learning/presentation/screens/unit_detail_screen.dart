@@ -243,10 +243,9 @@ class _UnitDetailScreenState extends ConsumerState<UnitDetailScreen>
         ref.invalidate(learningSessionProvider(widget.unitId));
         ref.invalidate(latestLearningSessionProvider);
       }
-      // Local persistence succeeded; asynchronously update the UI-facing
-      // sync status without delaying this debounced save operation.
+      // Queue the durable mutation before attempting mock sync.
       unawaited(
-        ref.read(syncStatusProvider.notifier).syncLocalChange(),
+        ref.read(syncStatusProvider.notifier).queueLearningProgress(widget.unitId),
       );
     } catch (error, stackTrace) {
       // The local database is the source of truth. A failed write must never
@@ -408,12 +407,12 @@ class _UnitDetailScreenState extends ConsumerState<UnitDetailScreen>
   }
 }
 
-class _SyncStatusLabel extends StatelessWidget {
+class _SyncStatusLabel extends ConsumerWidget {
   const _SyncStatusLabel({required this.status});
   final SyncStatus status;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final (icon, label, color) = switch (status) {
       SyncStatus.synced => (Icons.cloud_done_outlined, 'Synced', Colors.green),
       SyncStatus.pending => (
@@ -428,11 +427,20 @@ class _SyncStatusLabel extends StatelessWidget {
           Theme.of(context).colorScheme.error
         ),
     };
-    return Row(children: [
+    return Row(mainAxisSize: MainAxisSize.min, children: [
       Icon(icon, size: 16, color: color),
       const SizedBox(width: 5),
       Text(label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(color: color)),
+      if (status == SyncStatus.failed) ...[
+        const SizedBox(width: 4),
+        TextButton(
+          onPressed: () => unawaited(
+            ref.read(syncStatusProvider.notifier).retry(),
+          ),
+          child: const Text('Retry'),
+        ),
+      ],
     ]);
   }
 }

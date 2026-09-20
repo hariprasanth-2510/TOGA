@@ -101,4 +101,18 @@ void main() {
         QuestionResult(question: displayed, selectedOptionIndex: 0).isCorrect,
         isTrue);
   });
+
+  test('aggregates persisted assessment results into learner analytics', () {
+    final analytics = AssessmentAnalytics.fromResults([
+      _result({'1': 0, '2': 1}),
+      _result({'1': 0, '2': 3}),
+    ]);
+
+    expect(analytics.completedAttempts, 2);
+    expect(analytics.averageScore, 0.75);
+    expect(
+      {for (final topic in analytics.topicMastery) topic.topic: topic.percentage},
+      {'DME': 0.5, 'VOR': 1.0},
+    );
+  });
 }

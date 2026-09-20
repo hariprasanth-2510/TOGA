@@ -21,3 +21,7 @@ final assessmentAttemptProvider =
     FutureProvider.family<AssessmentAttempt?, String>((ref, attemptId) {
   return ref.watch(assessmentRepositoryProvider).getAttempt(attemptId);
 });
+
+final assessmentAnalyticsProvider = FutureProvider<AssessmentAnalytics>((ref) {
+  return ref.watch(assessmentServiceProvider).analytics();
+});

@@ -53,6 +53,9 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
     try {
       final submitted = await service.submit(attempt.id);
       ref.invalidate(activeAssessmentProvider);
+      // The Home dashboard may still be mounted beneath this route. Refresh
+      // its persisted-attempt aggregate as soon as submission succeeds.
+      ref.invalidate(assessmentAnalyticsProvider);
       if (mounted) context.go('/assessment/${submitted.id}/results');
     } finally {
       _submitting = false;

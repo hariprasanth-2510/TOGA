@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/learning/presentation/providers/learning_provider.dart';
+import '../features/assessment/presentation/providers/assessment_providers.dart';
 import 'theme_mode_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -12,6 +13,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
     final progress = ref.watch(learningProgressSummaryProvider);
+    final assessmentAnalytics = ref.watch(assessmentAnalyticsProvider);
     final isDark = themeMode == ThemeMode.dark ||
         (themeMode == ThemeMode.system &&
             MediaQuery.platformBrightnessOf(context) == Brightness.dark);
@@ -71,6 +73,37 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
+                ),
+                assessmentAnalytics.when(
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                  data: (analytics) => analytics.completedAttempts == 0
+                      ? const SizedBox.shrink()
+                      : Padding(
+                          padding: const EdgeInsets.only(top: 12),
+                          child: Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Assessment analytics',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                      '${analytics.completedAttempts} completed • ${(analytics.averageScore * 100).round()}% average score'),
+                                  ...analytics.topicMastery.map(
+                                    (topic) => Text(
+                                      '${topic.topic}: ${(topic.percentage * 100).round()}%',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                 ),
                 const SizedBox(height: 28),
                 FilledButton.icon(

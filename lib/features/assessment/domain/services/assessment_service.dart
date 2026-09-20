@@ -121,6 +121,25 @@ class AssessmentService {
     );
   }
 
+  Future<AssessmentAnalytics> analytics() async {
+    final attempts = await _repository.getSubmittedAttempts();
+    final results = <AssessmentResult>[];
+    for (final attempt in attempts) {
+      final questions = questionsFor(attempt);
+      results.add(AssessmentResult(
+        attempt: attempt,
+        config: config,
+        questions: questions
+            .map((question) => QuestionResult(
+                  question: question,
+                  selectedOptionIndex: attempt.answers[question.id],
+                ))
+            .toList(),
+      ));
+    }
+    return AssessmentAnalytics.fromResults(results);
+  }
+
   void _ensureEditable(AssessmentAttempt attempt) {
     if (!attempt.isEditable || !attempt.deadlineAt.isAfter(DateTime.now())) {
       throw StateError('This assessment is no longer editable.');

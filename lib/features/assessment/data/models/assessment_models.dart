@@ -184,3 +184,47 @@ class AssessmentResult {
   TopicAccuracy? get weakestTopic =>
       topicAccuracy.isEmpty ? null : topicAccuracy.first;
 }
+
+/// Aggregate learner metrics calculated from the persisted submitted attempts.
+class AssessmentAnalytics {
+  const AssessmentAnalytics({
+    required this.completedAttempts,
+    required this.averageScore,
+    required this.topicMastery,
+    this.lastActivityAt,
+  });
+
+  final int completedAttempts;
+  final double averageScore;
+  final List<TopicAccuracy> topicMastery;
+  final DateTime? lastActivityAt;
+
+  factory AssessmentAnalytics.fromResults(List<AssessmentResult> results) {
+    final values = <String, List<QuestionResult>>{};
+    for (final result in results) {
+      for (final question in result.questions) {
+        values.putIfAbsent(question.question.topic, () => []).add(question);
+      }
+    }
+    final mastery = values.entries
+        .map((entry) => TopicAccuracy(
+              topic: entry.key,
+              correct: entry.value.where((item) => item.isCorrect).length,
+              total: entry.value.length,
+            ))
+        .toList()
+      ..sort((a, b) => a.topic.compareTo(b.topic));
+    final dates = results
+        .map((result) => result.attempt.submittedAt)
+        .whereType<DateTime>();
+    return AssessmentAnalytics(
+      completedAttempts: results.length,
+      averageScore: results.isEmpty
+          ? 0
+          : results.map((result) => result.percentage).reduce((a, b) => a + b) /
+              results.length,
+      topicMastery: mastery,
+      lastActivityAt: dates.isEmpty ? null : dates.reduce((a, b) => a.isAfter(b) ? a : b),
+    );
+  }
+}
